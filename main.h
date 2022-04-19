@@ -1,32 +1,59 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef MAIN_H
+#define MAIN_H
 
-#include <stdarg.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 /**
- * struct printer - format printer struct
- * @spec: the format specifier
- * @fn: the function that handles @spec
+ * struct flags - struct containing flags to "turn on"
+ * when a flag specifier is passed to _printf()
+ * @plus: flag for the '+' character
+ * @space: flag for the ' ' character
+ * @hash: flag for the '#' character
  */
-
-typedef struct printer
+typedef struct flags
 {
-	char *spec;
-	int (*fn)(va_list);
-} print_t;
+	int plus;
+	int space;
+	int hash;
+} flags_t;
 
-int _putchar(char c);
+/**
+ * struct printHandler - struct to choose the right function depending
+ * on the format specifier passed to _printf()
+ * @c: format specifier
+ * @f: pointer to the correct printing function
+ */
+typedef struct printHandler
+{
+	char c;
+	int (*f)(va_list ap, flags_t *f);
+} ph;
+
+/* Functions for task one */
 int _printf(const char *format, ...);
-int print_char(va_list ap);
-int print_string(va_list ap);
-int print_space(va_list ap);
-int print_int(va_list ap);
-int print_unsigned(va_list ap);
-int print_octal(va_list ap);
-int print_digit(int num, int *count);
-int print_unsigned_digit(unsigned int num, int *count);
-int print_digit_octal(unsigned int num, int *count);
-int call_print_fn(char ch, va_list ap);
+int print_char(va_list l, flags_t *f);
+int print_string(va_list l, flags_t *f);
+int print_percentagesign(va_list l, flags_t *f);
 
-#endif /* __MAIN_H__ */
+/* Functions to deal with numbers */
+int print_int(va_list l, flags_t *f);
+int count_digit(int i);
+int print_unsigned(va_list l, flags_t *f);
+void print_number(int n);
+
+/* Functions for custom conversions */
+char *convert(unsigned long int num, int base, int lowercase);
+int print_binary(va_list l, flags_t *f);
+
+/* write_funcs */
+int _putchar(char c);
+int _puts(char *str);
+
+/* get_flag */
+int get_flag(char s, flags_t *f);
+
+/* get_print */
+int (*get_print(char s))(va_list, flags_t *);
+
+#endif
