@@ -1,58 +1,47 @@
+#include <stdarg.h>
+#include <unistd.h>
 #include "main.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 /**
- * _printf - mimic printf from stdio
- * Description: produces output according to a format
- * write output to stdout, the standard output stream
- * @format: character string composed of zero or more directives
- *
- * Return: the number of characters printed
- * (excluding the null byte used to end output to strings)
- * return -1 for incomplete specials error
- */
-
+  * _printf - function that produces output according to a format.
+  * @format: format (char, string, int, decimal)
+  * Return: size the output text;
+  */
 int _printf(const char *format, ...)
 {
-	unsigned int i;
-	int specialsPrinted = 0, charPrinted = 0;
-	va_list arg;
+	va_list ap;
+	int (*f)(va_list);
+	unsigned int i = 0, cprint = 0;
 
-	va_start(arg, format);
 	if (format == NULL)
 		return (-1);
-
-	for (i = 0; format[i] != '\0'; i++)
+	va_start(ap, format);
+	while (format[i])
 	{
-		if (format[i] != '%')
+		while (format[i] != '%' && format[i])
 		{
 			_putchar(format[i]);
-			charPrinted++;
-			continue;
-		}
-		if (format[i + 1] == '%')
-		{
-			_putchar('%');
-			charPrinted++;
+			cprint++;
 			i++;
+		}
+		if (format[i] == '\0')
+			return (cprint);
+		f = find_function(&format[i + 1]);
+		if (f != NULL)
+		{
+			cprint += f(ap);
+			i += 2;
 			continue;
 		}
-		if (format[i + 1] == '\0')
+		if (!format[i + 1])
 			return (-1);
-
-		specialsPrinted = printSpecials(format[i + 1], arg);
-		if (specialsPrinted == -1 || specialsPrinted != 0)
+		_putchar(format[i]);
+		cprint++;
+		if (format[i + 1] == '%')
+			i += 2;
+		else
 			i++;
-		if (specialsPrinted > 0)
-			charPrinted += specialsPrinted;
-
-		if (specialsPrinted == 0)
-		{
-			_putchar('%');
-			charPrinted++;
-		}
 	}
-	va_end(arg);
-	return (charPrinted);
+	va_end(ap);
+	return (cprint);
 }
